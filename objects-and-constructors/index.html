@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Objects and Constructors</title>
+        <link rel="stylesheet" href="./css/reset.css">
+        <link rel="stylesheet" href="./css/main.css">
+    </head>
+    <body>
+        <h1>Objects and Constructors</h1>
+        <section id="books">
+            <h2>Books</h2>
+            <div class="books-container">
+            </div>
+        </section>
+        <section id="books-management">
+            <input class="open-new-book-modal-btn" type="button" value="Add new Book!" />
+        </section>
+        <section id="add-new-book-formular" style="display:none">
+            <form>
+                <div class="meta">
+                    <h3>Create a new Book!</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <label for="book-creation-form-title">Title:
+                    <input id="book-creation-form-title" name="book-creation-form-title" />
+                </label>
+                <label for="book-creation-form-author">Author:
+                    <input id="book-creation-form-author" name="book-creation-form-author" />
+                </label>
+                <label for="book-creation-form-pages">Pages:
+                    <input type="number" id="book-creation-form-pages" name="book-creation-form-pages" />
+                </label>
+                <label for="book-creation-form-was-read">Was read?
+                    <input type="checkbox" id="book-creation-form-was-read" name="book-creation-form-was-read" />
+                </label>
+                <input type="button" value="Create New!" class="add-new-book-btn" />                
+            </form>
+        </section>
+        <script type="text/javascript" src="./js/book.js"></script>
+    </body>
+</html>
