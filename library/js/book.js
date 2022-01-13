@@ -5,13 +5,6 @@ function book(title, author, pages, wasRead){
     self.author = author;
     self.pages = pages;
     self.wasRead = wasRead;
-
-    self.info = function(){
-        return  `title: ${this.title}\n` +
-                `author: ${this.author}\n` +
-                `pages: ${this.pages}\n` +
-                `Already Readed: ${this.wasRead ? "yes" : "no"}`;
-    }
 }
 
 function library(books=[]){
@@ -39,7 +32,15 @@ function library(books=[]){
     self.books = self.books.filter(book => book.title != bookTitle);
   }
 
-  self.applyHandlers = function(newBookSelector, deleteBookSelector, libraryController, bookFormController){
+  self.updateBookReadStatus = function (bookTitle){
+    let currentBook = self.books.find(book => book.title == bookTitle);
+    currentBook.wasRead = !currentBook.wasRead;
+    // OOP Approach with immutable objects
+    // self.deleteBook(currentBook);
+    // self.addBookByData(currentBook.title, currentBook.author, currentBook.pages, !currentBook.wasRead);
+  }
+
+  self.applyHandlers = function(newBookSelector, libraryController, bookFormController){
 
     document.querySelector(newBookSelector).addEventListener('click', (e) => {
       e.preventDefault();
@@ -52,17 +53,7 @@ function library(books=[]){
       bookFormController.closeModal();
       libraryController.displayLibrary(self);
     });
-
-    let deletebuttons = document.querySelectorAll(deleteBookSelector);
-    
-    deletebuttons.forEach(deletebtn => { 
-      deletebtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        self.deleteBookByTitle(e.target.parentNode.dataset.key);
-        libraryController.displayLibrary(self);
-    })});
   }
-
 }
 
 // ### Controller ### 
@@ -76,15 +67,49 @@ function libraryController(libraryNodeSelector='body'){
       throw new Error('Library has no books array.');
     }
     document.querySelector(nodeSelector).innerHTML = "";
-    library.books.forEach(book => self.addBookToDisplay(book, nodeSelector));
+    library.books.forEach(book => self.addBookToDisplay(book, nodeSelector, library));
   }
 
-  self.addBookToDisplay = function(book, nodeSelector=self.libraryNodeSelector){
-    let template = `<div class="book" data-key="${book.title}">`+
-                   `<h3>${book.title}</h3><span class="close">&times;</span>`+
-                   `<div class="book-meta"><p>Author: ${book.author}, Pages: ${book.pages}</p></div></div>`;
+  self.addBookToDisplay = function(book, nodeSelector=self.libraryNodeSelector, library){
+    let bookNode = self.createBookNode(book);
+    let closeNode = self.createCloseNode(library);
+    let updateNode = self.createUpdateReadStatusNode(library);
+    let template = `<h3>${book.title}</h3>`+
+                   `<div class="book-meta"><p>Author: ${book.author}, Pages: ${book.pages}, Was Read: ${book.wasRead ? "true" : "false"}</p></div>`;
+    bookNode.innerHTML = template;
+    bookNode.appendChild(closeNode);
+    bookNode.appendChild(updateNode);
     
-    document.querySelector(nodeSelector).innerHTML += template;
+    document.querySelector(nodeSelector).appendChild(bookNode);
+  }
+
+  self.createCloseNode = function(library){
+    let closeNode = document.createElement('span');
+    closeNode.classList.add('close');
+    closeNode.innerHTML = 'delete';
+    closeNode.addEventListener('click', (e) => {
+      library.deleteBookByTitle(e.target.parentNode.dataset.key);
+      self.displayLibrary(library);
+    });
+    return closeNode;
+  }
+
+  self.createUpdateReadStatusNode = function(library){
+    let togglStatusNode = document.createElement('span');
+    togglStatusNode.classList.add('update');
+    togglStatusNode.innerHTML = 'change read status';
+    togglStatusNode.addEventListener('click', (e) => {
+      library.updateBookReadStatus(e.target.parentNode.dataset.key);
+      self.displayLibrary(library);
+    });
+    return togglStatusNode;
+  }
+
+  self.createBookNode = function(book){
+    let bookNode = document.createElement('div');
+    bookNode.classList.add('book');
+    bookNode.dataset.key = `${book.title}`;
+    return bookNode;
   }
 
 }
@@ -148,4 +173,4 @@ books_data.forEach(book => {
 myBookFormController.init();
 myLibraryController.displayLibrary(myLibrary);
 
-myLibrary.applyHandlers('.add-new-book-btn', 'div.book span.close', myLibraryController, myBookFormController);
+myLibrary.applyHandlers('.add-new-book-btn', myLibraryController, myBookFormController);

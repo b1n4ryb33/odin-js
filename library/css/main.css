@@ -27,6 +27,7 @@ section {
 }
 
 .books-container .book {
+    position: relative;
     margin: 10px 0px;
     padding: 15px;
     box-shadow: 5px 5px 15px rgba(30, 30, 30, 0.4);
@@ -102,12 +103,27 @@ section {
 }
 
 div.book span.close {
-    float: right;
-    font-size: 24px;
+    position: absolute;
+    right: 20px;
+    top:20px;
+    font-size: 18px;
     font-weight: 600;
 }
 
 div.book span.close:hover {
-    font-size:26px;
+    font-size:20px;
+    cursor: pointer;
+}
+
+div.book span.update {
+    position: absolute;
+    right: 100px;
+    top:20px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+div.book span.update:hover {
+    font-size:20px;
     cursor: pointer;
 }
