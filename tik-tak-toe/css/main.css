@@ -46,4 +46,19 @@ section {
     margin-top: 20px;
     margin-bottom: 20px;
 }
+
+section.game-board {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-template-rows: 200px 200px 200px;
+    font-size: 82px;
+    font-weight: 700;
+}
+
+section.game-board div.cell {
+    border: 4px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
     

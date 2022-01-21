@@ -1,10 +1,9 @@
 // ### Game Logic - Model ###
 
-// gameBoard Modul
 const gameBoard = (() => {
     'use strict';
 
-    let _board = [];
+    let _board = ['','','','','','','','',''];
 
     // private methods
     const _coordinateToIndex = (coordinate) => {
@@ -61,11 +60,64 @@ const gameBoard = (() => {
     }
 
     const clearBoard = () => {
-        _board = [];
+        _board = ['','','','','','','','',''];
     }
 
     return {setMarker, getBoard, clearBoard};
 })();
 
+const player = (name, marker) => {
+    const _name = name;
+    const _marker = marker;
 
+    const getName = () => {
+        return _name;
+    }
+
+    const getMarker = () => {
+        return _marker;
+    }
+
+    return {getName, getMarker};
+}
+
+const game = () => {
+    let _round = 0;
 // gameOver kommt ins Game Objekt
+}
+
+// ### Controller ###
+const displayController = ((gameMetaSelector, gameBoardSelector) => {
+    const _gameMetaNode = document.querySelector(gameMetaSelector);
+    const _gameBoardNode = document.querySelector(gameBoardSelector); 
+    
+    const displayGameBoard = (gameBoard) => {
+        // was ist mit sortierung?
+        // was ist wenn das Gameboard nicht 9 groß ist?
+
+        _clearBoard();
+
+        gameBoard.forEach(entry => {
+            _addCellNode(entry);
+        });
+    }
+
+    const _addCellNode = (entry) => {
+        const template = `<div class="cell" data-value="${entry}">${entry}</div>`;
+        _gameBoardNode.innerHTML += template;
+    }
+
+    const _clearBoard = () => {
+        _gameBoardNode.innerHTML = '';
+    }
+
+    return {displayGameBoard};
+
+    // displayStatus
+})('section.game-meta', 'section.game-board');
+
+// ### Execution ###
+
+displayController.displayGameBoard(gameBoard.getBoard());
+
+// Koordinaten rausstreichen. Statdessen dem template n Index mitgeben und diesen nehmen.
