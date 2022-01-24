@@ -5,48 +5,11 @@ const gameBoard = (() => {
 
     let _board = ['','','','','','','','',''];
 
-    // private methods
-    const _coordinateToIndex = (coordinate) => {
-        switch(coordinate){
-            case [0,0]:
-                return 0;
-            case [0,1]:
-                return 1;
-            case [0,2]:
-                return 2;
-            case [1,0]:
-                return 3;
-            case [1,1]:
-                return 4;
-            case [1,2]:
-                return 5;
-            case [2,0]:
-                return 6;
-            case [2,1]:
-                return 7;
-            case [2,2]:
-                return 8;
-            default:
-                throw new Error('Coordinate not in Range[0..2, 0..2].');
-        }
-    }
-
     const _positionIsFree = (index) => {
-        return _board[index] ? true : false;
+        return _board[index] != 'o' && _board[index] != 'x';
     }
 
-    // public methods
-    const setMarker = (marker, coordinate) => {
-        let index;
-        
-        try { 
-            index = _coordinateToIndex(coordinate);
-        } 
-        catch(e) {
-            console.log(`[Error]: ${e.message}`);
-            // Spiel sollte beendet werden
-        }
-
+    const setMarker = (marker, index) => {
         if(!_positionIsFree(index)){
            return false;
         }
@@ -84,6 +47,17 @@ const player = (name, marker) => {
 const game = () => {
     let _round = 0;
 // gameOver kommt ins Game Objekt
+
+    let _applyHandlers = () => {
+        let cells = Array.from(document.querySelectorAll('.game-board div.cell'));
+        cells.forEach(cell => cell.addEventListener('click', setMarker.bind(null, e)));
+    }
+
+    let setMarker = (e) => {
+        // currentplayer ->
+        // zelle aus event bestimmen
+
+    }
 }
 
 // ### Controller ###
@@ -97,13 +71,13 @@ const displayController = ((gameMetaSelector, gameBoardSelector) => {
 
         _clearBoard();
 
-        gameBoard.forEach(entry => {
-            _addCellNode(entry);
+        gameBoard.forEach((entry, index) => {
+            _addCellNode(entry, index);
         });
     }
 
-    const _addCellNode = (entry) => {
-        const template = `<div class="cell" data-value="${entry}">${entry}</div>`;
+    const _addCellNode = (entry, index) => {
+        const template = `<div class="cell" data-value="${entry}" data-index="${index}">${entry}</div>`;
         _gameBoardNode.innerHTML += template;
     }
 
@@ -118,6 +92,7 @@ const displayController = ((gameMetaSelector, gameBoardSelector) => {
 
 // ### Execution ###
 
+gameBoard.setMarker("x", 1);
+gameBoard.setMarker("o", 4);
+gameBoard.setMarker("x", 7);
 displayController.displayGameBoard(gameBoard.getBoard());
-
-// Koordinaten rausstreichen. Statdessen dem template n Index mitgeben und diesen nehmen.
