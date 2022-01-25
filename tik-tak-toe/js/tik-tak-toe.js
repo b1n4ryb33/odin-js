@@ -44,21 +44,72 @@ const player = (name, marker) => {
     return {getName, getMarker};
 }
 
-const game = () => {
+const game = (players, gameBoard, displayController) => {
+
     let _round = 0;
-// gameOver kommt ins Game Objekt
+
+    let activePlayer, otherplayer;
 
     let _applyHandlers = () => {
         let cells = Array.from(document.querySelectorAll('.game-board div.cell'));
-        cells.forEach(cell => cell.addEventListener('click', setMarker.bind(null, e)));
+        cells.forEach(cell => cell.addEventListener('click', _setMarker.bind(null, e)));
     }
 
-    let setMarker = (e) => {
+    let _setMarker = (e) => {
         // currentplayer ->
         // zelle aus event bestimmen
-
     }
+
+    let _setStartPlayer = () => {
+        return players[getRandomInt(1)];
+    }
+
+    let _gameOver = () => {
+        return false;
+    } 
+
+    let _tooglActivePlayer = () => {
+        let temp = activePlayer;
+        activePlayer = otherplayer;
+        otherplayer = temp;
+    }
+
+    let startNewGame = () => {
+        activePlayer = _setStartPlayer();
+        // kann auf die fresse fliegen, sofern mehr als zwei player da sind
+        otherplayer = players.find(player => player.name != activePlayer.name);
+        
+        while(!_gameOver) {
+            _applyHandlers();
+            activePlayer.play();
+            displayController.displayGameBoard(gameBoard);
+            _tooglActivePlayer();
+        }
+
+        // calculate winner
+    }
+
+    return {startNewGame}
 }
+
+const gameController = (() => {
+
+    let games, players = [], [];
+
+    let play = () => {
+        players = _setPlayer();
+        let newGame = game(players, gameBoard, displayController);
+        newGame.startNewGame();
+        games.push(newGame);
+    }
+
+    let _setPlayer = () => {
+        // entweder existierende Spieler
+        // neue Spieler (human oder computer)
+    }
+
+    return {play}
+})();
 
 // ### Controller ###
 const displayController = ((gameMetaSelector, gameBoardSelector) => {
@@ -90,9 +141,12 @@ const displayController = ((gameMetaSelector, gameBoardSelector) => {
     // displayStatus
 })('section.game-meta', 'section.game-board');
 
-// ### Execution ###
+// ### Helper Functions ###
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
 
-gameBoard.setMarker("x", 1);
-gameBoard.setMarker("o", 4);
-gameBoard.setMarker("x", 7);
-displayController.displayGameBoard(gameBoard.getBoard());
+// ### Execution ###
+while (true) {
+    gameController.play();
+}

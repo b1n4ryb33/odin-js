@@ -15,6 +15,12 @@ Ziel ist es ein Tik Tak Toe Spiel zu entwickeln.
 - Es wird angezeigt, wenn das Spiel vorbei ist und wenn jemand gewonnen hat
 - Man kann auf das Spielbrett klicken um Maker zu setzten
 
+Spielablauf
+- Spieler bestimmen oder übernehmen (Namen auswählen, Marker setzten)
+- Neues Spiel starten (Startspieler wird zufällig gesetzt, alternativ rundenweise getoggelt)
+- Jeder Spieler setzt abwechselnd solange Marker bis gameOver => true
+- Neues Spiel mit selben Spielern oder neuen 
+
 ## Problem Planen
 - Inputs: 
   - Namen
@@ -34,6 +40,7 @@ Bei Neustart mit gleicher Konfiguration werden Startspieler alterniert.
 - gameBoard Modul (gameBoard, setMarker(maker), gameOver()->x,o,p, newGame())
 - game ->  (player[], playRound())
 - displayController Modul (displayGameboard())
+- gameController Modul
 
 - opt. Computer Player Objekt (erbt von Player und hat eigene play() Methode)
 
