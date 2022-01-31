@@ -44,3 +44,13 @@ Bei Neustart mit gleicher Konfiguration werden Startspieler alterniert.
 
 - opt. Computer Player Objekt (erbt von Player und hat eigene play() Methode)
 
+EventListener Möglichkeiten
+- Nur der HumanPlayer braucht EventListener
+- Man könnte pro Zug die EventListener auf die (freien) Felder legen
+
+- Die EventListener könnten eine globale Funktion aufrufen, die die Gamelogik aufruft
+
+# Todos
+- Include Js
+- Observables
+- Async/Await

@@ -3,7 +3,7 @@
 const gameBoard = (() => {
     'use strict';
 
-    let _board = ['','','','','','','','',''];
+    let _board = Array(9).fill('');
 
     const _positionIsFree = (index) => {
         return _board[index] != 'o' && _board[index] != 'x';
@@ -41,7 +41,23 @@ const player = (name, marker) => {
         return _marker;
     }
 
-    return {getName, getMarker};
+    const play = () => {
+        
+        return new Promise ((resolve, reject) => {
+
+            let cells = Array.from(document.querySelectorAll('.game-board div.cell'));
+            cells.forEach(cell => {
+                if (cell.dataset.value != ''){
+                    return;
+                }
+                cell.addEventListener('click',  () => {
+                    resolve(cell.dataset.index);
+                });
+            }); 
+        });
+    }
+
+    return {getName, getMarker, play};
 }
 
 const game = (players, gameBoard, displayController) => {
@@ -50,62 +66,55 @@ const game = (players, gameBoard, displayController) => {
 
     let activePlayer, otherplayer;
 
-    let _applyHandlers = () => {
-        let cells = Array.from(document.querySelectorAll('.game-board div.cell'));
-        cells.forEach(cell => cell.addEventListener('click', _setMarker.bind(null, e)));
+    const _setStartPlayer = () => {
+        return players[0];
     }
 
-    let _setMarker = (e) => {
-        // currentplayer ->
-        // zelle aus event bestimmen
-    }
-
-    let _setStartPlayer = () => {
-        return players[getRandomInt(1)];
-    }
-
-    let _gameOver = () => {
-        return false;
-    } 
-
-    let _tooglActivePlayer = () => {
+    const _tooglActivePlayer = () => {
         let temp = activePlayer;
         activePlayer = otherplayer;
         otherplayer = temp;
     }
 
-    let startNewGame = () => {
+    const _gameOver = () => {
+        return false;
+    } 
+
+    const startGame = async () => {
         activePlayer = _setStartPlayer();
-        // kann auf die fresse fliegen, sofern mehr als zwei player da sind
-        otherplayer = players.find(player => player.name != activePlayer.name);
-        
-        while(!_gameOver) {
-            _applyHandlers();
-            activePlayer.play();
-            displayController.displayGameBoard(gameBoard);
-            _tooglActivePlayer();
-        }
+        otherplayer = players.find(player => player.getName() != activePlayer.getName());
+        displayController.displayGameBoard(gameBoard.getBoard());
+
+          for (let i = 0; i < 9; i++) {
+            let playersChoice = await activePlayer.play();
+            gameBoard.setMarker(activePlayer.getMarker(), playersChoice);
+            displayController.displayGameBoard(gameBoard.getBoard());
+            _tooglActivePlayer(activePlayer, otherplayer);
+         }
 
         // calculate winner
     }
 
-    return {startNewGame}
+    return {startGame}
 }
 
 const gameController = (() => {
 
-    let games, players = [], [];
+    let games = [];
+    let players = [];
 
     let play = () => {
         players = _setPlayer();
         let newGame = game(players, gameBoard, displayController);
-        newGame.startNewGame();
+        newGame.startGame();
         games.push(newGame);
     }
 
     let _setPlayer = () => {
         // entweder existierende Spieler
         // neue Spieler (human oder computer)
+        // erstmal nur prototypisch
+        return [player('player one', 'x'), player('player two', 'o')];
     }
 
     return {play}
@@ -141,12 +150,8 @@ const displayController = ((gameMetaSelector, gameBoardSelector) => {
     // displayStatus
 })('section.game-meta', 'section.game-board');
 
-// ### Helper Functions ###
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-}
 
 // ### Execution ###
-while (true) {
-    gameController.play();
-}
+
+gameController.play();
+
