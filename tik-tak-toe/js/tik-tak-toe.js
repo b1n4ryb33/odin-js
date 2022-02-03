@@ -1,5 +1,4 @@
 // ### Game Logic - Model ###
-
 const gameBoard = (() => {
     'use strict';
 
@@ -23,29 +22,22 @@ const gameBoard = (() => {
     }
 
     const clearBoard = () => {
-        _board = ['','','','','','','','',''];
+        _board = Array(9).fill('');
     }
 
     return {setMarker, getBoard, clearBoard};
 })();
 
-const player = (name, marker) => {
-    const _name = name;
+const player = (marker) => {
     const _marker = marker;
-
-    const getName = () => {
-        return _name;
-    }
 
     const getMarker = () => {
         return _marker;
     }
 
     const play = () => {
-        
+        let cells = Array.from(document.querySelectorAll('.game-board div.cell'));
         return new Promise ((resolve, reject) => {
-
-            let cells = Array.from(document.querySelectorAll('.game-board div.cell'));
             cells.forEach(cell => {
                 if (cell.dataset.value != ''){
                     return;
@@ -53,16 +45,14 @@ const player = (name, marker) => {
                 cell.addEventListener('click',  () => {
                     resolve(cell.dataset.index);
                 });
-            }); 
+            });
         });
     }
 
-    return {getName, getMarker, play};
+    return {getMarker, play};
 }
 
 const game = (players, gameBoard, displayController) => {
-
-    let _round = 0;
 
     let activePlayer, otherplayer;
 
@@ -76,23 +66,55 @@ const game = (players, gameBoard, displayController) => {
         otherplayer = temp;
     }
 
-    const _gameOver = () => {
-        return false;
-    } 
+    const _gameOver = (gameBoard, marker) => {
+        
+        let isGameOver = -1;
+        
+        if (_isWinningPosition(gameBoard, marker)){
+            isGameOver = 1;
+        }
+        if (!_isWinningPosition(gameBoard, marker) && gameBoard.every(cell => cell != '')){
+            isGameOver = 0;
+        }
+
+        return isGameOver;
+    }
+
+    const _isWinningPosition = (gameBoard, marker) => {
+        let combinations = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        let isGameOver = false;
+        combinations.forEach(combination => {
+            let isWinningPosition = gameBoard.filter((cell, index) => 
+                 combination.some(idx => idx === index)
+            ).every(cell => {return cell === marker;});
+            if (isWinningPosition){
+                isGameOver = true;
+            }
+        });
+        return isGameOver;
+    }
 
     const startGame = async () => {
         activePlayer = _setStartPlayer();
-        otherplayer = players.find(player => player.getName() != activePlayer.getName());
+        otherplayer = players.find(player => player.getMarker() != activePlayer.getMarker());
         displayController.displayGameBoard(gameBoard.getBoard());
 
-          for (let i = 0; i < 9; i++) {
+        while (_gameOver(gameBoard.getBoard(), otherplayer.getMarker()) === -1) {
             let playersChoice = await activePlayer.play();
             gameBoard.setMarker(activePlayer.getMarker(), playersChoice);
             displayController.displayGameBoard(gameBoard.getBoard());
             _tooglActivePlayer(activePlayer, otherplayer);
-         }
+        }
 
-        // calculate winner
+        let gameOver = _gameOver(gameBoard.getBoard(), otherplayer.getMarker());
+
+        if(gameOver === 1){
+            alert(`Player with ${otherplayer.getMarker()} won.`);
+        }
+        if(gameOver === 0){
+            alert('Game drewed.');
+        }
+       
     }
 
     return {startGame}
@@ -114,13 +136,13 @@ const gameController = (() => {
         // entweder existierende Spieler
         // neue Spieler (human oder computer)
         // erstmal nur prototypisch
-        return [player('player one', 'x'), player('player two', 'o')];
+        return [player('x'), player('o')];
     }
 
     return {play}
 })();
 
-// ### Controller ###
+// ### View Controller ###
 const displayController = ((gameMetaSelector, gameBoardSelector) => {
     const _gameMetaNode = document.querySelector(gameMetaSelector);
     const _gameBoardNode = document.querySelector(gameBoardSelector); 
@@ -150,8 +172,5 @@ const displayController = ((gameMetaSelector, gameBoardSelector) => {
     // displayStatus
 })('section.game-meta', 'section.game-board');
 
-
 // ### Execution ###
-
 gameController.play();
-
