@@ -88,6 +88,10 @@ const game = (players, gameBoard, displayController) => {
                  combination.some(idx => idx === index)
             ).every(cell => {return cell === marker;});
             if (isWinningPosition){
+                let winningCells = [];
+                combination.forEach(cell => winningCells.push(document.querySelector(`div.cell[data-index='${cell}']`)));
+                console.dir(winningCells);
+                displayController.highligthWinningCells(winningCells);
                 isGameOver = true;
             }
         });
@@ -100,6 +104,7 @@ const game = (players, gameBoard, displayController) => {
         displayController.displayGameBoard(gameBoard.getBoard());
 
         while (_gameOver(gameBoard.getBoard(), otherplayer.getMarker()) === -1) {
+            displayController.displayActivePlayer(activePlayer.getMarker());
             let playersChoice = await activePlayer.play();
             gameBoard.setMarker(activePlayer.getMarker(), playersChoice);
             displayController.displayGameBoard(gameBoard.getBoard());
@@ -109,10 +114,10 @@ const game = (players, gameBoard, displayController) => {
         let gameOver = _gameOver(gameBoard.getBoard(), otherplayer.getMarker());
 
         if(gameOver === 1){
-            alert(`Player with ${otherplayer.getMarker()} won.`);
+            console.log(`Player with ${otherplayer.getMarker()} won.`);
         }
         if(gameOver === 0){
-            alert('Game drewed.');
+            console.log('Game drewed.');
         }
        
     }
@@ -136,7 +141,7 @@ const gameController = (() => {
         // entweder existierende Spieler
         // neue Spieler (human oder computer)
         // erstmal nur prototypisch
-        return [player('x'), player('o')];
+        return [player('X'), player('O')];
     }
 
     return {play}
@@ -147,6 +152,14 @@ const displayController = ((gameMetaSelector, gameBoardSelector) => {
     const _gameMetaNode = document.querySelector(gameMetaSelector);
     const _gameBoardNode = document.querySelector(gameBoardSelector); 
     
+    const displayActivePlayer = (marker) => {
+        _gameMetaNode.innerHTML = `<p class="active-player">Player <span class="marker">${marker}</span> turn</p>`;
+    }
+
+    const highligthWinningCells = (cells) => {
+        cells.forEach(cell => cell.classList.add('highlight-cell'));
+    }
+
     const displayGameBoard = (gameBoard) => {
         // was ist mit sortierung?
         // was ist wenn das Gameboard nicht 9 groß ist?
@@ -167,7 +180,7 @@ const displayController = ((gameMetaSelector, gameBoardSelector) => {
         _gameBoardNode.innerHTML = '';
     }
 
-    return {displayGameBoard};
+    return {displayGameBoard, displayActivePlayer, highligthWinningCells};
 
     // displayStatus
 })('section.game-meta', 'section.game-board');

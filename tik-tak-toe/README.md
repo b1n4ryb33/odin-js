@@ -51,11 +51,6 @@ EventListener Möglichkeiten
 - Die EventListener könnten eine globale Funktion aufrufen, die die Gamelogik aufruft
 
 # Todos
-- Include Js
-- Observables
-- Async/Await
-
-## GameOver
-- Draw -> keine freien Felder mehr, und nirgends eine Winning position
-- True -> Winning Position
-- False -> weder draw noch winning position
+- Spielerauswahl
+- Ergebnisanzeige
+- AI Gegner

@@ -3,13 +3,13 @@
     --main-text-color: rgb(35,35,35);
     --main-background-color: rgb(240,240,240);
 
-    --primary-color: rgb();
-    --primary-color-ligthen: rgb();
-    --primary-color-darken: rgb();
+    --primary-color: #f4a261;
+    --primary-color-ligthen: #e9c46a;
+    --primary-color-darken: #e76f51;
 
     --secondary-color: rgb();
-    --secondary-color-ligthen: rgb();
-    --secondary-color-darken: rgb();
+    --secondary-color-ligthen: #2a9d8f;
+    --secondary-color-darken:#264653;
 
     /** Global Colors **/
     background-color: var(--main-background-color);
@@ -26,7 +26,7 @@
 
 /** Headings **/    
 h1 {
-    font-size: 28px;
+    font-size: 102px;
     font-weight: 500;
 }
 
@@ -49,8 +49,9 @@ section {
 
 section.game-board {
     display: grid;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 200px 200px 200px;
+    gap: 2px;
     font-size: 82px;
     font-weight: 700;
 }
@@ -60,5 +61,39 @@ section.game-board div.cell {
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 6px;
+
+}
+
+section.game-meta p.active-player {
+    font-size: 42px;
+}
+
+section.game-meta p.active-player span.marker{
+    color: var(--primary-color-darken);
+    font-weight: 900;
+}
+
+section.game-control {
+    display: flex;
+    gap: 20px;
+    justify-content: flex-end;
+}
+
+section.game-control input {
+    font-size: 42px;
+    padding: 20px 40px;
+    border-radius: 8px;
+    background-color: var(--secondary-color-ligthen);
+}
+
+section.game-control input:hover {
+    background-color: var(--main-background-color);
+    cursor: pointer;
+}
+
+.highlight-cell {
+    background-color: var(--secondary-color-ligthen);
+    box-shadow: 0px 0px 40px var(--secondary-color-ligthen);
 }
     
