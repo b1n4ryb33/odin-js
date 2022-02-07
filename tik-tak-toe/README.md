@@ -51,6 +51,6 @@ EventListener Möglichkeiten
 - Die EventListener könnten eine globale Funktion aufrufen, die die Gamelogik aufruft
 
 # Todos
-- Spielerauswahl
+- Spielerauswahl (2 Screens)
 - Ergebnisanzeige
 - AI Gegner

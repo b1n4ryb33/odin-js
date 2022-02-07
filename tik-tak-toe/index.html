@@ -10,11 +10,59 @@
     <header>
       <h1>Tik Tak Toe </h1>
     </header>
-    <section class="game-meta"></section>
-    <section class="game-board"></section>
-    <section class="game-control">
-      <input type="button" id="start-new-game-btn" value="Start new Game"/>
-      <input type="button" id="replay-game-btn" value="Replay" disabled/>
+    <section class="player-selection-screen">
+      <h2>Player Selection</h2>
+      <div class="selection">
+        <h3>Player One Selection</h3>
+        <div class="slider">
+          <div class="human-player">
+            <img src="./assets/man.png">
+            <input type="radio" value="human" name="player-one-selection" id="player-one-human" checked>
+            <label for="player-one-human">Human</label>
+          </div>
+          <div class="ai-player">
+            <img src="./assets/ai-easy.png" height="100px">
+            <input type="radio" value="human" name="player-one-selection" id="player-one-ai-easy">
+            <label for="player-one-ai-easy">Easy AI</label>
+          </div>
+          <div class="ai-player">
+            <img src="./assets/ai.png">
+            <input type="radio" value="human" name="player-one-selection" id="player-one-ai">
+            <label for="player-one-ai">Hard AI</label>
+          </div>
+        </div>
+      </div>
+      <div class="selection">
+        <h3>Player Two Selection</h3>
+        <div class="slider">
+          <div class="human-player">
+            <img src="./assets/man.png">
+            <input type="radio" value="human" name="player-two-selection" id="player-two-human" checked>
+            <label for="player-one-human">Human</label>
+          </div>
+          <div class="ai-player">
+            <img src="./assets/ai-easy.png" height="100px">
+            <input type="radio" value="human" name="player-two-selection" id="player-two-ai-easy">
+            <label for="player-one-ai-easy">Easy AI</label>
+          </div>
+          <div class="ai-player">
+            <img src="./assets/ai.png">
+            <input type="radio" value="human" name="player-two-selection" id="player-two-ai">
+            <label for="player-one-ai">Hard AI</label>
+          </div>
+        </div>
+      </div>
+      <div>
+        <input type="button" value="Start Game" id="start-new-session-btn">
+      </div>
+    </section>
+    <section class="game-screen">
+      <section class="game-meta"></section>
+      <section class="game-board"></section>
+      <section class="game-control">
+        <input type="button" id="start-new-game-btn" value="Start new Game"/>
+        <input type="button" id="replay-game-btn" value="Replay" disabled/>
+      </section>
     </section>
     <script type="text/javascript" src="./js/tik-tak-toe.js"></script>
   </body>

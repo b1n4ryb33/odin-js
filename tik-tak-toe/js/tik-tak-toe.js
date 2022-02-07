@@ -52,7 +52,7 @@ const player = (marker) => {
     return {getMarker, play};
 }
 
-const game = (players, gameBoard, displayController) => {
+const game = (players, gameBoard, gameController) => {
 
     let activePlayer, otherplayer;
 
@@ -91,7 +91,7 @@ const game = (players, gameBoard, displayController) => {
                 let winningCells = [];
                 combination.forEach(cell => winningCells.push(document.querySelector(`div.cell[data-index='${cell}']`)));
                 console.dir(winningCells);
-                displayController.highligthWinningCells(winningCells);
+                gameController.highligthWinningCells(winningCells);
                 isGameOver = true;
             }
         });
@@ -101,13 +101,13 @@ const game = (players, gameBoard, displayController) => {
     const startGame = async () => {
         activePlayer = _setStartPlayer();
         otherplayer = players.find(player => player.getMarker() != activePlayer.getMarker());
-        displayController.displayGameBoard(gameBoard.getBoard());
+        gameController.displayGameBoard(gameBoard.getBoard());
 
         while (_gameOver(gameBoard.getBoard(), otherplayer.getMarker()) === -1) {
-            displayController.displayActivePlayer(activePlayer.getMarker());
+            gameController.displayActivePlayer(activePlayer.getMarker());
             let playersChoice = await activePlayer.play();
             gameBoard.setMarker(activePlayer.getMarker(), playersChoice);
-            displayController.displayGameBoard(gameBoard.getBoard());
+            gameController.displayGameBoard(gameBoard.getBoard());
             _tooglActivePlayer(activePlayer, otherplayer);
         }
 
@@ -125,14 +125,14 @@ const game = (players, gameBoard, displayController) => {
     return {startGame}
 }
 
-const gameController = (() => {
+const gameManager = (() => {
 
     let games = [];
     let players = [];
 
-    let play = () => {
+    let play = (playerOne, playerTwo) => {
         players = _setPlayer();
-        let newGame = game(players, gameBoard, displayController);
+        let newGame = game(players, gameBoard, gameController);
         newGame.startGame();
         games.push(newGame);
     }
@@ -148,7 +148,7 @@ const gameController = (() => {
 })();
 
 // ### View Controller ###
-const displayController = ((gameMetaSelector, gameBoardSelector) => {
+const gameController = ((gameMetaSelector, gameBoardSelector) => {
     const _gameMetaNode = document.querySelector(gameMetaSelector);
     const _gameBoardNode = document.querySelector(gameBoardSelector); 
     
@@ -185,5 +185,39 @@ const displayController = ((gameMetaSelector, gameBoardSelector) => {
     // displayStatus
 })('section.game-meta', 'section.game-board');
 
+const displayController = ((gameManager, playerSelectionSelector, gameSelector) => {
+    const _playerSelectionNode = document.querySelector(playerSelectionSelector);
+    const _gameNode = document.querySelector(gameSelector); 
+
+    // wechseln zwischen den Screens
+    const _hideNode = (node) => {
+        node.style.display = 'none';
+    }
+
+    const _showNode = (node, value) => {
+        node.style.display = value;
+    }
+
+    // radio Buttons
+    const _addStartNewSessionListener = (startButton, playerOneSelection, playerTwoSelection) => {
+        const _playerOneSelection = document.querySelector(`input[name=${playerOneSelection}]:checked`).value;
+        const _playerTwoSelection = document.querySelector(`input[name=${playerTwoSelection}]:checked`).value;
+        const _startButton = document.querySelector(startButton);
+
+        _startButton.addEventListener('click', () => {
+            _hideNode(_playerSelectionNode);
+            _showNode(_gameNode, 'block');
+            gameManager.play(_playerOneSelection, _playerTwoSelection);
+        });
+    }
+
+    const init = () => {
+        _addStartNewSessionListener('#start-new-session-btn', 'player-one-selection', 'player-two-selection');
+    }
+
+    return {init};
+})(gameManager, 'section.player-selection-screen', 'section.game-screen');
+
 // ### Execution ###
-gameController.play();
+// gameManager.play();
+displayController.init();

@@ -26,25 +26,34 @@
 
 /** Headings **/    
 h1 {
-    font-size: 102px;
+    font-size: 64px;
     font-weight: 500;
 }
 
 h2 {
-    font-size: 24px;
+    font-size: 38px;
     font-weight: 500;
 }
 
 h3 {
-    font-size: 21px;
+    font-size: 32px;
     font-weight: 400;
 }
 
 
 /** Sections **/
+body {
+    display: flex;
+    flex-direction: column;
+}
+
 section {
     margin-top: 20px;
     margin-bottom: 20px;
+}
+
+section.game-screen{
+    display: none;
 }
 
 section.game-board {
@@ -66,7 +75,7 @@ section.game-board div.cell {
 }
 
 section.game-meta p.active-player {
-    font-size: 42px;
+    font-size: 32px;
 }
 
 section.game-meta p.active-player span.marker{
@@ -81,7 +90,7 @@ section.game-control {
 }
 
 section.game-control input {
-    font-size: 42px;
+    font-size: 32px;
     padding: 20px 40px;
     border-radius: 8px;
     background-color: var(--secondary-color-ligthen);
@@ -96,4 +105,71 @@ section.game-control input:hover {
     background-color: var(--secondary-color-ligthen);
     box-shadow: 0px 0px 40px var(--secondary-color-ligthen);
 }
-    
+
+section.player-selection-screen {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    grid-template-areas: 
+        "header header"
+        "one two";
+    gap: 20px;
+}
+
+section.player-selection-screen h2 {
+    grid-area: header;
+}
+
+section.player-selection-screen div.selection {
+    border: 2px solid #264653;
+    box-shadow: 0px 0px 10px #264653;
+    border-radius: 8px;
+    padding: 20px;
+}
+section.player-selection-screen div.selection .slider {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    padding: 10px;
+}
+
+section.player-selection-screen div.selection .slider div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+section.player-selection-screen div.selection .slider div input {
+    font-size: 18px;
+    border-radius: 6px;
+    padding: 10px 20px;
+}
+
+section.player-selection-screen div.selection .slider div input:hover {
+    background-color: #2a9d8f;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0px 0px 10px #2a9d8f;
+}
+
+section.player-selection-screen div.selection .slider div input[type="radio"] {
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #999;
+    transition: 0.2s all linear;
+  }
+
+section.player-selection-screen div input{
+    font-size: 24px;
+    padding: 15px 30px;
+    border-radius: 8px;
+    background-color: var(--primary-color-ligthen);
+  }
+
+section.player-selection-screen div input:hover {
+    background-color: var(--main-background-color);
+    cursor: pointer;
+    box-shadow: 0px 0px 20px var(--primary-color-ligthen);
+}
