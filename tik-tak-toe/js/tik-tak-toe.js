@@ -30,11 +30,24 @@ const gameBoard = (() => {
 
 const player = (marker) => {
     const _marker = marker;
+    let _winnings = 0;
 
     const getMarker = () => {
         return _marker;
     }
 
+    const won = () => {
+        _winnings++;
+    }
+
+    const getWinnigns = () => {
+        return _winnings;
+    }
+
+    return {getMarker, won, getWinnigns};
+}
+
+const humanPlayer = (marker) => {
     const play = () => {
         let cells = Array.from(document.querySelectorAll('.game-board div.cell'));
         return new Promise ((resolve, reject) => {
@@ -49,7 +62,32 @@ const player = (marker) => {
         });
     }
 
-    return {getMarker, play};
+    return Object.assign({}, {play}, player(marker));
+}
+
+const easyAi = (marker) => {
+
+    const _getFreePositions = () => {
+        let freePositions = [];
+        gameBoard.getBoard().forEach((cell, idx) =>{
+            if(cell === '') {
+                freePositions.push(idx);
+            }
+        });
+        return freePositions;
+    }
+
+    const play = () => {
+        const freePositions = _getFreePositions();
+        console.dir(freePositions);
+        const playersChoice = freePositions[Math.floor(Math.random() * freePositions.length)];
+        return new Promise ((resolve, reject) => {
+            setTimeout(() => {resolve(playersChoice);}, 1200);
+        });
+    }
+
+
+    return Object.assign({}, {play}, player(marker));
 }
 
 const game = (players, gameBoard, gameController) => {
@@ -99,9 +137,11 @@ const game = (players, gameBoard, gameController) => {
     }
 
     const startGame = async () => {
+        gameBoard.clearBoard();
         activePlayer = _setStartPlayer();
         otherplayer = players.find(player => player.getMarker() != activePlayer.getMarker());
         gameController.displayGameBoard(gameBoard.getBoard());
+        gameController.displayPlayersInfo(players);
 
         while (_gameOver(gameBoard.getBoard(), otherplayer.getMarker()) === -1) {
             gameController.displayActivePlayer(activePlayer.getMarker());
@@ -115,10 +155,12 @@ const game = (players, gameBoard, gameController) => {
 
         if(gameOver === 1){
             console.log(`Player with ${otherplayer.getMarker()} won.`);
+            otherplayer.won();
         }
         if(gameOver === 0){
             console.log('Game drewed.');
         }
+        gameController.displayPlayersInfo(players);
        
     }
 
@@ -130,21 +172,18 @@ const gameManager = (() => {
     let games = [];
     let players = [];
 
-    let play = (playerOne, playerTwo) => {
-        players = _setPlayer();
+    let play = () => {
         let newGame = game(players, gameBoard, gameController);
         newGame.startGame();
         games.push(newGame);
     }
 
-    let _setPlayer = () => {
-        // entweder existierende Spieler
-        // neue Spieler (human oder computer)
-        // erstmal nur prototypisch
-        return [player('X'), player('O')];
+    let setPlayers = (playerOne, playerTwo) => {
+        players = [humanPlayer('X'), easyAi('O')];
+        console.dir(players);
     }
 
-    return {play}
+    return {play, setPlayers}
 })();
 
 // ### View Controller ###
@@ -153,7 +192,7 @@ const gameController = ((gameMetaSelector, gameBoardSelector) => {
     const _gameBoardNode = document.querySelector(gameBoardSelector); 
     
     const displayActivePlayer = (marker) => {
-        _gameMetaNode.innerHTML = `<p class="active-player">Player <span class="marker">${marker}</span> turn</p>`;
+        _gameMetaNode.querySelector('div.active-player').innerHTML = `<p class="active-player">Player <span class="marker">${marker}</span> turn</p>`;
     }
 
     const highligthWinningCells = (cells) => {
@@ -171,6 +210,16 @@ const gameController = ((gameMetaSelector, gameBoardSelector) => {
         });
     }
 
+    const displayPlayersInfo = (players) => {
+        _gameMetaNode.querySelector('div.players-info').innerHTML = '';
+        players.forEach(player => _displayPlayerInfo(player));
+    }
+
+    const _displayPlayerInfo = (player) => {
+        const template = `<ul class="player-info"><li>Player ${player.getMarker()}</li><li>Score: ${player.getWinnigns()}</li></ul>`;
+        _gameMetaNode.querySelector('div.players-info').innerHTML += template;
+    }
+
     const _addCellNode = (entry, index) => {
         const template = `<div class="cell" data-value="${entry}" data-index="${index}">${entry}</div>`;
         _gameBoardNode.innerHTML += template;
@@ -180,7 +229,7 @@ const gameController = ((gameMetaSelector, gameBoardSelector) => {
         _gameBoardNode.innerHTML = '';
     }
 
-    return {displayGameBoard, displayActivePlayer, highligthWinningCells};
+    return {displayGameBoard, displayActivePlayer, highligthWinningCells, displayPlayersInfo};
 
     // displayStatus
 })('section.game-meta', 'section.game-board');
@@ -189,7 +238,6 @@ const displayController = ((gameManager, playerSelectionSelector, gameSelector) 
     const _playerSelectionNode = document.querySelector(playerSelectionSelector);
     const _gameNode = document.querySelector(gameSelector); 
 
-    // wechseln zwischen den Screens
     const _hideNode = (node) => {
         node.style.display = 'none';
     }
@@ -198,8 +246,7 @@ const displayController = ((gameManager, playerSelectionSelector, gameSelector) 
         node.style.display = value;
     }
 
-    // radio Buttons
-    const _addStartNewSessionListener = (startButton, playerOneSelection, playerTwoSelection) => {
+    const _addStartNewGameListener = (startButton, playerOneSelection, playerTwoSelection) => {
         const _playerOneSelection = document.querySelector(`input[name=${playerOneSelection}]:checked`).value;
         const _playerTwoSelection = document.querySelector(`input[name=${playerTwoSelection}]:checked`).value;
         const _startButton = document.querySelector(startButton);
@@ -207,17 +254,32 @@ const displayController = ((gameManager, playerSelectionSelector, gameSelector) 
         _startButton.addEventListener('click', () => {
             _hideNode(_playerSelectionNode);
             _showNode(_gameNode, 'block');
-            gameManager.play(_playerOneSelection, _playerTwoSelection);
+            gameManager.setPlayers(_playerOneSelection, _playerTwoSelection);
+            gameManager.play();
+        });
+    }
+
+    const _addReplayEventListener = (replayButton) => {
+        document.querySelector(replayButton).addEventListener('click', () => {
+            gameManager.play();
+        });
+    }
+
+    const _addChangePlayerEventListener = (changePlayerButton) => {
+        document.querySelector(changePlayerButton).addEventListener('click', () => {
+            _hideNode(_gameNode);
+            _showNode(_playerSelectionNode, 'grid');
         });
     }
 
     const init = () => {
-        _addStartNewSessionListener('#start-new-session-btn', 'player-one-selection', 'player-two-selection');
+        _addStartNewGameListener('#start-new-game-btn', 'player-one-selection', 'player-two-selection');
+        _addReplayEventListener('#replay-game-btn');
+        _addChangePlayerEventListener('#change-players-btn');
     }
 
     return {init};
 })(gameManager, 'section.player-selection-screen', 'section.game-screen');
 
 // ### Execution ###
-// gameManager.play();
 displayController.init();
