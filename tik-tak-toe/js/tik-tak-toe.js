@@ -1,11 +1,49 @@
 // ### Game Logic - Model ###
-const gameBoard = (() => {
-    'use strict';
+const board = (board = Array(9).fill('')) => {
 
-    let _board = Array(9).fill('');
+    let _board = board;
+    let _winningCells = [];
+
+    const _setWinningCells = (combination) => {
+        _winningCells = combination;
+    }
+
+    const _isWinningPosition = (marker) => {
+        const combinations = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        let isGameOver = false;
+        combinations.forEach(combination => {
+            let isWinningPosition = _board.filter((cell, index) => 
+                 combination.some(idx => idx === index)
+            ).every(cell => {return cell === marker;});
+            if (isWinningPosition){
+                _setWinningCells(combination);
+                isGameOver = true;
+            }
+        });
+        return isGameOver;
+    }
 
     const _positionIsFree = (index) => {
-        return _board[index] != 'o' && _board[index] != 'x';
+        return _board[index] === '';
+    }
+
+    const _getFreePositions = () => {
+        let freePositions = [];
+        _board.forEach((cell, idx) => {
+            _positionIsFree(idx) ? freePositions.push(idx) : null;
+        });
+        return freePositions;
+    }
+
+    const getNextMoves = (marker) => {
+        let freePositions = _getFreePositions();
+        let nextMoves = [];
+        freePositions.forEach(freePosition => {
+            let newPosition = board(_board);
+            newPosition.setMarker(marker, freePosition);
+            nextMoves.push([newPosition, freePosition]);
+        });
+        return nextMoves;
     }
 
     const setMarker = (marker, index) => {
@@ -25,8 +63,26 @@ const gameBoard = (() => {
         _board = Array(9).fill('');
     }
 
-    return {setMarker, getBoard, clearBoard};
-})();
+    const gameOver = (marker) => {
+        
+        let isGameOver = -1;
+        const isWinningPosition = _isWinningPosition(marker);
+        if (isWinningPosition){
+            isGameOver = 1;
+        }
+        if (!isWinningPosition && _board.every(cell => cell != '')){
+            isGameOver = 0;
+        }
+
+        return isGameOver;
+    }
+
+    const getWinningCells = () => {
+        return _winningCells;
+    }
+
+    return {setMarker, getBoard, clearBoard, getNextMoves, getWinningCells, gameOver};
+}
 
 const player = (marker) => {
     const _marker = marker;
@@ -90,6 +146,60 @@ const easyAi = (marker) => {
     return Object.assign({}, {play}, player(marker));
 }
 
+const hardAi = (marker) => {
+
+    const _miniMax = (board, isMaximizingPlayer = true) => {
+        const isGameOver = board.gameOver();
+        if(isGameOver === 0 || (isGameOver === 1 && isMaximizingPlayer)){
+            return isGameOver;
+        }
+        if( isGameOver === 1 && !isMaximizingPlayer){
+            return -1;
+        }
+
+        let nextMoves = board.getNextMoves(marker);
+
+        if(isMaximizingPlayer){
+            let maxEval = -Infinity;
+            nextMoves.forEach(move => {
+                let evaluation = _miniMax(move[0], false);
+                maxEval = maxEval > evaluation ? maxEval : evaluation; 
+            });
+            return maxEval;
+        }
+        else {
+            let minEval = +Infinity;
+            nextMoves.forEach(move => {
+                let evaluation = _miniMax(move[0], true);
+                minEval = minEval < evaluation ? minEval : evaluation; 
+            });
+            return minEval;
+        }
+    }
+
+    const _findBestMove = (board) => {
+        let bestMove = null;
+        let bestScore = -1;
+        let nextMoves = board.getNextMoves(marker);
+        nextMoves.forEach(move => {
+            let moveScore = _miniMax(move[0]);
+            if(moveScore > bestScore){
+                bestMove = move[1];
+                bestScore = moveScore;
+            }
+        });
+        return bestMove;
+    }
+
+    const play = () => {
+        return new Promise ((resolve, reject) => {
+            setTimeout(() => {resolve(_findBestMove(gameBoard));}, 1200);
+        });
+    }
+
+    return Object.assign({}, {play}, player(marker));
+}
+
 const game = (players, gameBoard, gameController) => {
 
     let activePlayer, otherplayer;
@@ -104,38 +214,6 @@ const game = (players, gameBoard, gameController) => {
         otherplayer = temp;
     }
 
-    const _gameOver = (gameBoard, marker) => {
-        
-        let isGameOver = -1;
-        
-        if (_isWinningPosition(gameBoard, marker)){
-            isGameOver = 1;
-        }
-        if (!_isWinningPosition(gameBoard, marker) && gameBoard.every(cell => cell != '')){
-            isGameOver = 0;
-        }
-
-        return isGameOver;
-    }
-
-    const _isWinningPosition = (gameBoard, marker) => {
-        let combinations = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-        let isGameOver = false;
-        combinations.forEach(combination => {
-            let isWinningPosition = gameBoard.filter((cell, index) => 
-                 combination.some(idx => idx === index)
-            ).every(cell => {return cell === marker;});
-            if (isWinningPosition){
-                let winningCells = [];
-                combination.forEach(cell => winningCells.push(document.querySelector(`div.cell[data-index='${cell}']`)));
-                console.dir(winningCells);
-                gameController.highligthWinningCells(winningCells);
-                isGameOver = true;
-            }
-        });
-        return isGameOver;
-    }
-
     const startGame = async () => {
         gameBoard.clearBoard();
         activePlayer = _setStartPlayer();
@@ -143,7 +221,7 @@ const game = (players, gameBoard, gameController) => {
         gameController.displayGameBoard(gameBoard.getBoard());
         gameController.displayPlayersInfo(players);
 
-        while (_gameOver(gameBoard.getBoard(), otherplayer.getMarker()) === -1) {
+        while (gameBoard.gameOver(otherplayer.getMarker()) === -1) {
             gameController.displayActivePlayer(activePlayer.getMarker());
             let playersChoice = await activePlayer.play();
             gameBoard.setMarker(activePlayer.getMarker(), playersChoice);
@@ -151,9 +229,10 @@ const game = (players, gameBoard, gameController) => {
             _tooglActivePlayer(activePlayer, otherplayer);
         }
 
-        let gameOver = _gameOver(gameBoard.getBoard(), otherplayer.getMarker());
+        let gameOver = gameBoard.gameOver(otherplayer.getMarker());
 
         if(gameOver === 1){
+            gameController.highligthWinningCells(gameBoard.getWinningCells());
             console.log(`Player with ${otherplayer.getMarker()} won.`);
             otherplayer.won();
         }
@@ -167,6 +246,10 @@ const game = (players, gameBoard, gameController) => {
     return {startGame}
 }
 
+const gameBoard = (() => {
+    return board();
+})();
+
 const gameManager = (() => {
 
     let games = [];
@@ -179,7 +262,7 @@ const gameManager = (() => {
     }
 
     let setPlayers = (playerOne, playerTwo) => {
-        players = [humanPlayer('X'), easyAi('O')];
+        players = [humanPlayer('X'), hardAi('O')];
         console.dir(players);
     }
 
@@ -195,8 +278,10 @@ const gameController = ((gameMetaSelector, gameBoardSelector) => {
         _gameMetaNode.querySelector('div.active-player').innerHTML = `<p class="active-player">Player <span class="marker">${marker}</span> turn</p>`;
     }
 
-    const highligthWinningCells = (cells) => {
-        cells.forEach(cell => cell.classList.add('highlight-cell'));
+    const highligthWinningCells = (winningCells) => {
+        let winningCellsNodes = [];
+        winningCells.forEach(cell => winningCellsNodes.push(document.querySelector(`div.cell[data-index='${cell}']`)));
+        winningCellsNodes.forEach(cell => cell.classList.add('highlight-cell'));
     }
 
     const displayGameBoard = (gameBoard) => {
