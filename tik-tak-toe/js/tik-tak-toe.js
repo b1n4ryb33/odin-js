@@ -1,7 +1,7 @@
 // ### Game Logic - Model ###
 const board = (board = Array(9).fill('')) => {
 
-    let _board = board;
+    let _board = board.slice();
     let _winningCells = [];
 
     const _setWinningCells = (combination) => {
@@ -25,25 +25,6 @@ const board = (board = Array(9).fill('')) => {
 
     const _positionIsFree = (index) => {
         return _board[index] === '';
-    }
-
-    const _getFreePositions = () => {
-        let freePositions = [];
-        _board.forEach((cell, idx) => {
-            _positionIsFree(idx) ? freePositions.push(idx) : null;
-        });
-        return freePositions;
-    }
-
-    const getNextMoves = (marker) => {
-        let freePositions = _getFreePositions();
-        let nextMoves = [];
-        freePositions.forEach(freePosition => {
-            let newPosition = board(_board);
-            newPosition.setMarker(marker, freePosition);
-            nextMoves.push([newPosition, freePosition]);
-        });
-        return nextMoves;
     }
 
     const setMarker = (marker, index) => {
@@ -81,7 +62,35 @@ const board = (board = Array(9).fill('')) => {
         return _winningCells;
     }
 
-    return {setMarker, getBoard, clearBoard, getNextMoves, getWinningCells, gameOver};
+    return {setMarker, getBoard, clearBoard, getWinningCells, gameOver};
+}
+
+const boardFactory = () => {
+
+    const _positionIsFree = (board, index) => {
+        return board[index] === '';
+    }
+
+    const _getFreePositions = (board) => {
+        let freePositions = [];
+        board.forEach((cell, idx) => {
+            _positionIsFree(board, idx) ? freePositions.push(idx) : null;
+        });
+        return freePositions;
+    }
+
+    const getNextMoves = (marker, currentBoard) => {
+        let freePositions = _getFreePositions(currentBoard);
+        let nextMoves = [];
+        freePositions.forEach(freePosition => {
+            let newPosition = board(currentBoard);
+            newPosition.setMarker(marker, freePosition);
+            nextMoves.push([newPosition, freePosition]);
+        });
+        return nextMoves;
+    }
+
+    return {getNextMoves};
 }
 
 const player = (marker) => {
@@ -148,16 +157,16 @@ const easyAi = (marker) => {
 
 const hardAi = (marker) => {
 
-    const _miniMax = (board, isMaximizingPlayer = true) => {
-        const isGameOver = board.gameOver();
+    const _miniMax = (board, isMaximizingPlayer = false) => {
+        const isGameOver = board.gameOver(marker);
         if(isGameOver === 0 || (isGameOver === 1 && isMaximizingPlayer)){
             return isGameOver;
         }
         if( isGameOver === 1 && !isMaximizingPlayer){
             return -1;
         }
-
-        let nextMoves = board.getNextMoves(marker);
+        let boardCreator = boardFactory();
+        let nextMoves = boardCreator.getNextMoves(marker, board.getBoard());
 
         if(isMaximizingPlayer){
             let maxEval = -Infinity;
@@ -180,7 +189,8 @@ const hardAi = (marker) => {
     const _findBestMove = (board) => {
         let bestMove = null;
         let bestScore = -1;
-        let nextMoves = board.getNextMoves(marker);
+        let boardCreator = boardFactory();
+        let nextMoves = boardCreator.getNextMoves(marker, board.getBoard());
         nextMoves.forEach(move => {
             let moveScore = _miniMax(move[0]);
             if(moveScore > bestScore){
