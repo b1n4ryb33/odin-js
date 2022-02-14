@@ -45,7 +45,6 @@ const board = (board = Array(9).fill('')) => {
     }
 
     const gameOver = (marker) => {
-        
         let isGameOver = -1;
         const isWinningPosition = _isWinningPosition(marker);
         if (isWinningPosition){
@@ -65,7 +64,7 @@ const board = (board = Array(9).fill('')) => {
     return {setMarker, getBoard, clearBoard, getWinningCells, gameOver};
 }
 
-const boardFactory = () => {
+const nextMovesFactory = () => {
 
     const _positionIsFree = (board, index) => {
         return board[index] === '';
@@ -79,6 +78,7 @@ const boardFactory = () => {
         return freePositions;
     }
 
+    // returns a touple (board instance with new move, index of new move)
     const getNextMoves = (marker, currentBoard) => {
         let freePositions = _getFreePositions(currentBoard);
         let nextMoves = [];
@@ -144,56 +144,57 @@ const easyAi = (marker) => {
 
     const play = () => {
         const freePositions = _getFreePositions();
-        console.dir(freePositions);
         const playersChoice = freePositions[Math.floor(Math.random() * freePositions.length)];
         return new Promise ((resolve, reject) => {
-            setTimeout(() => {resolve(playersChoice);}, 1200);
+            setTimeout(() => {resolve(playersChoice);}, 500);
         });
     }
-
 
     return Object.assign({}, {play}, player(marker));
 }
 
-const hardAi = (marker) => {
+const hardAi = (marker, oppositeMarker, isMaximizingPlayer) => {
 
-    const _miniMax = (board, isMaximizingPlayer = false) => {
-        const isGameOver = board.gameOver(marker);
-        if(isGameOver === 0 || (isGameOver === 1 && isMaximizingPlayer)){
+    const _miniMax = (move, oppositeMarker, marker, isMaximizingPlayer = false) => {
+        let _marker = marker;
+        let _oppositeMarker = oppositeMarker; 
+        const isGameOver = move.gameOver(_marker);
+        
+        if(isGameOver === 0 || (isGameOver === 1 && !isMaximizingPlayer)){
             return isGameOver;
         }
-        if( isGameOver === 1 && !isMaximizingPlayer){
+        if(isGameOver === 1 && isMaximizingPlayer){
             return -1;
         }
-        let boardCreator = boardFactory();
-        let nextMoves = boardCreator.getNextMoves(marker, board.getBoard());
+        const _nextMovesFactory = nextMovesFactory();
+        const nextMoves = _nextMovesFactory.getNextMoves(_oppositeMarker, move.getBoard());
 
         if(isMaximizingPlayer){
-            let maxEval = -Infinity;
+            let maxEval = -1000;
             nextMoves.forEach(move => {
-                let evaluation = _miniMax(move[0], false);
+                let evaluation = _miniMax(move[0], _marker, _oppositeMarker, false);
                 maxEval = maxEval > evaluation ? maxEval : evaluation; 
             });
             return maxEval;
         }
         else {
-            let minEval = +Infinity;
+            let minEval = 1000;
             nextMoves.forEach(move => {
-                let evaluation = _miniMax(move[0], true);
+                let evaluation = _miniMax(move[0], _marker, _oppositeMarker, true);
                 minEval = minEval < evaluation ? minEval : evaluation; 
             });
             return minEval;
         }
     }
 
-    const _findBestMove = (board) => {
+    const _findBestMove = (board, marker) => {
         let bestMove = null;
         let bestScore = -1;
-        let boardCreator = boardFactory();
-        let nextMoves = boardCreator.getNextMoves(marker, board.getBoard());
+        const _nextMovesFactory = nextMovesFactory();
+        const nextMoves = _nextMovesFactory.getNextMoves(marker, board.getBoard());
         nextMoves.forEach(move => {
-            let moveScore = _miniMax(move[0]);
-            if(moveScore > bestScore){
+            let moveScore = _miniMax(move[0], oppositeMarker, marker, isMaximizingPlayer);
+            if(moveScore >= bestScore){
                 bestMove = move[1];
                 bestScore = moveScore;
             }
@@ -203,7 +204,7 @@ const hardAi = (marker) => {
 
     const play = () => {
         return new Promise ((resolve, reject) => {
-            setTimeout(() => {resolve(_findBestMove(gameBoard));}, 1200);
+            setTimeout(() => {resolve(_findBestMove(gameBoard, marker, isMaximizingPlayer));}, 500);
         });
     }
 
@@ -256,6 +257,8 @@ const game = (players, gameBoard, gameController) => {
     return {startGame}
 }
 
+// I outsourced the gameBoard logic to board thus I can reuse it with minimax alg
+// Nevertheless, having a gamBoard Singelton seems to be a good idea
 const gameBoard = (() => {
     return board();
 })();
@@ -263,17 +266,32 @@ const gameBoard = (() => {
 const gameManager = (() => {
 
     let games = [];
-    let players = [];
+    let _players = [];
 
-    let play = () => {
-        let newGame = game(players, gameBoard, gameController);
+    const play = () => {
+        let newGame = game(_players, gameBoard, gameController);
         newGame.startGame();
         games.push(newGame);
     }
 
-    let setPlayers = (playerOne, playerTwo) => {
-        players = [humanPlayer('X'), hardAi('O')];
-        console.dir(players);
+    const setPlayers = (playerOne, playerTwo) => {
+        console.log(playerOne);
+        console.log(playerTwo);
+        _players = [];
+        _setPlayer(playerOne, 'X', 'O');
+        _setPlayer(playerTwo, 'O', 'X');
+    }
+
+    const _setPlayer = (playerType, marker, oppositeMarker) => {
+        switch(playerType){
+            case 'human':
+            // default:
+                _players.push(humanPlayer(marker));
+            case 'easy':
+                _players.push(easyAi(marker));
+            case 'hard':
+                _players.push(hardAi(marker, oppositeMarker, false));
+        }
     }
 
     return {play, setPlayers}
@@ -342,11 +360,11 @@ const displayController = ((gameManager, playerSelectionSelector, gameSelector) 
     }
 
     const _addStartNewGameListener = (startButton, playerOneSelection, playerTwoSelection) => {
-        const _playerOneSelection = document.querySelector(`input[name=${playerOneSelection}]:checked`).value;
-        const _playerTwoSelection = document.querySelector(`input[name=${playerTwoSelection}]:checked`).value;
-        const _startButton = document.querySelector(startButton);
+      const _startButton = document.querySelector(startButton);
 
         _startButton.addEventListener('click', () => {
+            const _playerOneSelection = document.querySelector(`input[name=${playerOneSelection}]:checked`).value;
+            const _playerTwoSelection = document.querySelector(`input[name=${playerTwoSelection}]:checked`).value;    
             _hideNode(_playerSelectionNode);
             _showNode(_gameNode, 'block');
             gameManager.setPlayers(_playerOneSelection, _playerTwoSelection);
