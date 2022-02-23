@@ -14,6 +14,9 @@ function navigationController (selector, components = []) {
     const displayNavigation = () => {
         console.log('[Log] - Loading navigation...');    
         _components.forEach(component => {
+            if(component.getName === undefined || component.display === undefined){
+                throw new Error('Component does not have a name or display method.');
+            }
             _addToNavigation(component);
         });
     }
