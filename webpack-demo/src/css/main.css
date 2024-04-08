@@ -1,0 +1,51 @@
+:root{
+    /** Global Variables **/
+    --main-text-color: rgb(35,35,35);
+    --main-background-color: rgb(240,240,240);
+
+    --primary-color: rgb();
+    --primary-color-ligthen: rgb();
+    --primary-color-darken: rgb();
+
+    --secondary-color: rgb();
+    --secondary-color-ligthen: rgb();
+    --secondary-color-darken: rgb();
+
+    /** Global Colors **/
+    background-color: var(--main-background-color);
+    color: var(--main-text-color);
+
+    /** Global Font **/
+    font-family: "Lucida Console", "Courier New", monospace;
+
+    /** Global Spacings **/
+    margin-left: 20%;
+    margin-right: 20%;
+    margin-top: 20px;
+    background: url('./../usecaseoverview-small.png');
+}
+
+/** Headings **/    
+h1 {
+    font-size: 28px;
+    font-weight: 500;
+    color: red;
+}
+
+h2 {
+    font-size: 24px;
+    font-weight: 500;
+}
+
+h3 {
+    font-size: 21px;
+    font-weight: 400;
+}
+
+
+/** Sections **/
+section {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+    
