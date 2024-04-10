@@ -1,0 +1,53 @@
+{  "projects": [
+        {
+            "name": "odin-js",
+            "description": "The Odin JavaScript Course.",
+            "isDeafult": "true",
+            "todos": [
+                {
+                    "title": "Finish TodoList",
+                    "description": "Finish current project.",
+                    "dueDate": "22.03.2022",
+                    "priority": "High"
+                },
+                {   
+                    "title": "Finish Next Chapter",
+                    "description": "Complete the next chapters of OdinsJs.",
+                    "dueDate": "15.04.2022",
+                    "priority": "Normal",
+                    "notes": "Ganz ganz wichtig."
+                },
+                {
+                    "title": "Review Code",
+                    "description": "Review the developed code and clean up repository.",
+                    "dueDate": "01.05.2022",
+                    "priority": "Normal"
+                }
+            ]
+        },{
+            "name": "odin-advanced-html",
+            "description": "The Odin HTML advanced Course.",
+            "isDeafult": "false",
+            "todos": [
+                {
+                    "title": "Finish TodoList",
+                    "description": "Finish current project.",
+                    "dueDate": "22.03.2022",
+                    "priority": "High"
+                },
+                {   
+                    "title": "Finish Next Chapter",
+                    "description": "Complete the next chapters of OdinsJs.",
+                    "dueDate": "15.04.2022",
+                    "priority": "Normal"
+                },
+                {
+                    "title": "Review Code",
+                    "description": "Review the developed code and clean up repository.",
+                    "dueDate": "01.05.2022",
+                    "priority": "Normal"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,15 @@
+.project-overview {
+    margin: 10px;
+    padding: 20px 40px;
+    background-color: var(--secondary-color);
+    border-radius: 10px;
+}
+
+.project-overview h3 {
+    font-weight: 600;
+}
+
+.project-overview:hover {
+    cursor: pointer;
+    box-shadow: 0 0 20px var(--secondary-color);
+}

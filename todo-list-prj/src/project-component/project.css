@@ -1,0 +1,31 @@
+.prj, .issues {
+    margin: 10px;
+    padding: 20px 40px;
+    background-color: var(--secondary-color);
+    border-radius: 10px;
+}
+
+.issue {
+    margin: 10px;
+    padding: 20px 40px;
+    border-radius: 10px;
+    background-color: var(--secondary-color-ligthen);
+}
+
+.issue h3 {
+    font-weight: 600;
+}
+
+#content > div.prj {
+    display: flex;
+    flex-direction: column;
+}
+
+#content > div.prj > div.proj-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+#content > div.prj > div.proj-header > svg:hover {
+    cursor: pointer;
+}
